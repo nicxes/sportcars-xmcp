@@ -1,248 +1,177 @@
-# SportcarsLux MCP Server
+# xmcp Application
 
-Servidor MCP (Model Context Protocol) para SportcarsLux que permite consultar el inventario de vehículos desde Cursor o cualquier cliente MCP.
+This project was created with [create-xmcp-app](https://github.com/basementstudio/xmcp).
 
-## 🚀 Características
+## Getting Started
 
-- ✅ **get-vehicles**: Obtener vehículos de la base de datos de Supabase
-- ✅ **greet**: Saludar usuarios
-- ✅ **review-code**: Prompt para revisar código
-- ✅ Soporte para STDIO (local) y HTTP (remoto)
-
-## 📋 Requisitos
-
-- Node.js 22+ (recomendado: 22.20.0)
-- npm o yarn
-- Cuenta de Supabase con credenciales
-
-## 🛠️ Instalación Local
-
-### 1. Clonar el repositorio
+First, run the development server:
 
 ```bash
-git clone <tu-repo>
-cd sportcars-xmcp
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
 ```
 
-### 2. Instalar dependencias
+This will start the MCP server with the selected transport method.
 
-```bash
-npm install
-```
+## Project Structure
 
-### 3. Configurar variables de entorno
+This project uses the structured approach where tools, prompts, and resources are automatically discovered from their respective directories:
 
-Crear archivo `.env` en la raíz:
+- `src/tools` - Tool definitions
+- `src/prompts` - Prompt templates
+- `src/resources` - Resource handlers
 
-```env
-SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
-```
+### Tools
 
-### 4. Compilar el proyecto
-
-```bash
-npm run build
-```
-
-### 5. Configurar en Cursor
-
-Crear/editar `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "sportcars-xmcp": {
-      "command": "node",
-      "args": [
-        "--experimental-fetch",
-        "-r", "dotenv/config",
-        "/ruta/absoluta/a/sportcars-xmcp/dist/stdio.js"
-      ],
-      "env": {
-        "DOTENV_CONFIG_PATH": "/ruta/absoluta/a/sportcars-xmcp/.env"
-      }
-    }
-  }
-}
-```
-
-### 6. Reiniciar Cursor
-
-Después de configurar, reinicia Cursor para que cargue el servidor MCP.
-
-## ☁️ Deployment en Vercel (Uso Remoto)
-
-### 1. Preparar el proyecto
-
-El proyecto ya está configurado para Vercel con:
-- ✅ `vercel.json` configurado
-- ✅ Servidor HTTP habilitado
-- ✅ Variables de entorno configuradas
-
-### 2. Instalar Vercel CLI (opcional)
-
-```bash
-npm install -g vercel
-```
-
-### 3. Configurar variables de entorno en Vercel
-
-En el dashboard de Vercel o via CLI:
-
-```bash
-vercel env add SUPABASE_URL
-vercel env add SUPABASE_SERVICE_ROLE_KEY
-```
-
-### 4. Desplegar
-
-```bash
-vercel deploy --prod
-```
-
-O conecta el repositorio desde el dashboard de Vercel.
-
-### 5. Usar el servidor remoto
-
-Una vez desplegado, obtendrás una URL como `https://sportcars-xmcp.vercel.app`
-
-Configura en Cursor con HTTP:
-
-```json
-{
-  "mcpServers": {
-    "sportcars-xmcp-remote": {
-      "transport": "http",
-      "url": "https://sportcars-xmcp.vercel.app"
-    }
-  }
-}
-```
-
-## 🧑‍💻 Uso para Compañeros
-
-### Opción 1: Usar servidor remoto (Recomendado)
-
-1. Obtén la URL del servidor desplegado
-2. Configura en tu `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "sportcars-xmcp": {
-      "transport": "http",
-      "url": "https://sportcars-xmcp.vercel.app"
-    }
-  }
-}
-```
-
-3. Reinicia Cursor
-4. ¡Listo! Ya puedes usar las herramientas MCP
-
-### Opción 2: Instalación local
-
-Sigue los pasos de "Instalación Local" arriba.
-
-## 📝 Herramientas Disponibles
-
-### get-vehicles
-
-Obtiene vehículos de la base de datos.
-
-**Parámetros:**
-- `limit` (opcional): Número de vehículos a retornar (default: 5)
-- `offset` (opcional): Número de vehículos a saltar (default: 0)
-
-**Ejemplo:**
-```
-"Dame los primeros 10 vehículos"
-```
-
-### greet
-
-Saluda a un usuario por nombre.
-
-**Parámetros:**
-- `name`: Nombre del usuario
-
-**Ejemplo:**
-```
-"Salúdame con mi nombre Nicolas"
-```
-
-### review-code
-
-Prompt para revisar código.
-
-**Parámetros:**
-- `code`: Código a revisar
-
-## 🔧 Desarrollo
-
-### Agregar nuevas herramientas
-
-1. Crear archivo en `src/tools/nueva-herramienta.ts`
-2. Exportar `schema`, `metadata` y función default
-3. Compilar: `npm run build`
-4. Reiniciar Cursor
-
-Ejemplo:
+Each tool is defined in its own file with the following structure:
 
 ```typescript
 import { z } from "zod";
 import { type InferSchema, type ToolMetadata } from "xmcp";
 
 export const schema = {
-  param: z.string().describe("Description"),
+  name: z.string().describe("The name of the user to greet"),
 };
 
 export const metadata: ToolMetadata = {
-  name: "nueva-herramienta",
-  description: "Descripción",
+  name: "greet",
+  description: "Greet the user",
   annotations: {
-    title: "Nueva Herramienta",
+    title: "Greet the user",
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,
   },
 };
 
-export default async function nuevaHerramienta({ 
-  param 
-}: InferSchema<typeof schema>) {
-  return `Resultado: ${param}`;
+export default function greet({ name }: InferSchema<typeof schema>) {
+  return `Hello, ${name}!`;
 }
 ```
 
-### Probar localmente
+### Prompts
 
-```bash
-# Modo desarrollo (auto-reload)
-npm run dev
+Prompts are template definitions for AI interactions:
 
-# Servidor HTTP
-npm run start:http
+```typescript
+import { z } from "zod";
+import { type InferSchema, type PromptMetadata } from "xmcp";
 
-# Servidor STDIO
-npm start
+export const schema = {
+  code: z.string().describe("The code to review"),
+};
+
+export const metadata: PromptMetadata = {
+  name: "review-code",
+  title: "Review Code",
+  description: "Review code for best practices and potential issues",
+  role: "user",
+};
+
+export default function reviewCode({ code }: InferSchema<typeof schema>) {
+  return `Please review this code: ${code}`;
+}
 ```
 
-## 📚 Recursos
+### Resources
 
-- [XMCP Documentation](https://xmcp.dev/docs)
-- [MCP Protocol](https://modelcontextprotocol.io)
-- [Supabase Docs](https://supabase.com/docs)
+Resources provide data or content with URI-based access:
 
-## 🤝 Contribuir
+```typescript
+import { z } from "zod";
+import { type ResourceMetadata, type InferSchema } from "xmcp";
 
-1. Fork el proyecto
-2. Crea una rama: `git checkout -b feature/nueva-funcionalidad`
-3. Commit cambios: `git commit -m 'Add nueva funcionalidad'`
-4. Push: `git push origin feature/nueva-funcionalidad`
-5. Abre un Pull Request
+export const schema = {
+  userId: z.string().describe("The ID of the user"),
+};
 
-## 📄 Licencia
+export const metadata: ResourceMetadata = {
+  name: "user-profile",
+  title: "User Profile",
+  description: "User profile information",
+};
 
-Este proyecto es privado de SportcarsLux.
+export default function handler({ userId }: InferSchema<typeof schema>) {
+  return `Profile data for user ${userId}`;
+}
+```
+
+## Adding New Components
+
+### Adding New Tools
+
+To add a new tool:
+
+1. Create a new `.ts` file in the `src/tools` directory
+2. Export a `schema` object defining the tool parameters using Zod
+3. Export a `metadata` object with tool information
+4. Export a default function that implements the tool logic
+
+### Adding New Prompts
+
+To add a new prompt:
+
+1. Create a new `.ts` file in the `src/prompts` directory
+2. Export a `schema` object defining the prompt parameters using Zod
+3. Export a `metadata` object with prompt information and role
+4. Export a default function that returns the prompt text
+
+### Adding New Resources
+
+To add a new resource:
+
+1. Create a new `.ts` file in the `src/resources` directory
+2. Use folder structure to define the URI (e.g., `(users)/[userId]/profile.ts` → `users://{userId}/profile`)
+3. Export a `schema` object for dynamic parameters (optional for static resources)
+4. Export a `metadata` object with resource information
+5. Export a default function that returns the resource content
+
+## Building for Production
+
+To build your project for production:
+
+```bash
+npm run build
+# or
+yarn build
+# or
+pnpm build
+```
+
+This will compile your TypeScript code and output it to the `dist` directory.
+
+## Running the Server
+
+You can run the server for the transport built with:
+
+- HTTP: `node dist/http.js`
+- STDIO: `node dist/stdio.js`
+
+Given the selected transport method, you will have a custom start script added to the `package.json` file.
+
+For HTTP:
+
+```bash
+npm run start-http
+# or
+yarn start-http
+# or
+pnpm start-http
+```
+
+For STDIO:
+
+```bash
+npm run start-stdio
+# or
+yarn start-stdio
+# or
+pnpm start-stdio
+```
+
+## Learn More
+
+- [xmcp Documentation](https://xmcp.dev/docs)
