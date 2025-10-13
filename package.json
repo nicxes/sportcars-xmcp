@@ -1,0 +1,28 @@
+{
+  "name": "sportcars-xmcp",
+  "version": "0.1.0",
+  "description": "An xmcp application with tool syntax",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "xmcp build",
+    "dev": "xmcp dev",
+    "start": "node dist/stdio.js",
+    "start:http": "node dist/http.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.0",
+    "dotenv": "^16.3.1",
+    "undici": "^7.16.0",
+    "xmcp": "^0.3.2",
+    "zod": "3.24.4"
+  },
+  "main": "./dist/stdio.js",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "sportcars-xmcp": "./dist/stdio.js"
+  }
+}

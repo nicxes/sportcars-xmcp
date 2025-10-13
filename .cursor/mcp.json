@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "sportcars-xmcp": {
+      "command": "node",
+      "args": [
+        "--experimental-fetch",
+        "-r", "dotenv/config",
+        "/Users/nicxes/Code/sportcars-xmcp/dist/stdio.js"
+      ],
+      "env": {
+        "DOTENV_CONFIG_PATH": "/Users/nicxes/Code/sportcars-xmcp/.env",
+        "NODE_OPTIONS": "--no-warnings"
+      }
+    }
+  }
+}
+
