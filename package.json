@@ -9,7 +9,8 @@
     "build": "xmcp build",
     "dev": "xmcp dev",
     "start": "node dist/stdio.js",
-    "start:http": "node dist/http.js"
+    "start:http": "node dist/http.js",
+    "deploy": "vercel deploy"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",
