@@ -1,7 +1,9 @@
-import { type XmcpConfig } from "xmcp";
+import { type XmcpConfig } from "xmcp"
 
 const config: XmcpConfig = {
-  stdio: true,
+  stdio: {
+    debug: true, // adds extra logging to the console
+  },
   http: {
     port: process.env.PORT ? parseInt(process.env.PORT) : 3001,
   },
@@ -10,6 +12,6 @@ const config: XmcpConfig = {
     prompts: "./src/prompts",
     resources: "./src/resources",
   }
-};
+}
 
 export default config;
