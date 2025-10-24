@@ -2,6 +2,17 @@ import { z } from "zod";
 import { type InferSchema, type ToolMetadata } from "xmcp";
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * SportcarsLux Vehicle Database Tool
+ * 
+ * Data Source: vAuto.com
+ * Update Frequency: Every 2 hours
+ * Database: SportcarsLux Supabase instance
+ * 
+ * This tool provides access to luxury and sports vehicle inventory
+ * with real-time pricing and availability information.
+ */
+
 export const schema = {
   // Basic filters
   make: z.string().optional().describe("Filter by vehicle make/brand (e.g., 'Ferrari', 'Porsche')"),
@@ -34,11 +45,16 @@ export const schema = {
   // Other
   body: z.string().optional().describe("Filter by body type (e.g., 'Coupe', 'Sedan')"),
   dealerName: z.string().optional().describe("Filter by dealer name"),
+  
+  // Sorting and ordering
+  sortBy: z.enum(['updated_at', 'created_at', 'year', 'price', 'odometer']).optional().describe("Sort by field"),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe("Sort order: 'asc' for ascending, 'desc' for descending"),
+  limit: z.number().optional().describe("Limit number of results returned"),
 };
 
 export const metadata: ToolMetadata = {
   name: "get-vehicles",
-  description: "Get all vehicles from SportcarsLux database with optional filters",
+  description: "Get all vehicles from SportcarsLux database with optional filters. Data source: vAuto.com, updated every 2 hours",
   annotations: {
     title: "Get Vehicles",
     readOnlyHint: true,
@@ -66,6 +82,9 @@ export default async function getVehicles({
   maxOdometer,
   body,
   dealerName,
+  sortBy,
+  sortOrder,
+  limit,
 }: InferSchema<typeof schema>) {
   try {
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -157,6 +176,17 @@ export default async function getVehicles({
       query = query.ilike('dealer_name', `%${dealerName}%`);
     }
 
+    // Apply sorting
+    if (sortBy) {
+      const order = sortOrder || 'desc';
+      query = query.order(sortBy, { ascending: order === 'asc' });
+    }
+
+    // Apply limit
+    if (limit) {
+      query = query.limit(limit);
+    }
+
     const { data, error } = await query;
 
     if (error) {
@@ -173,10 +203,12 @@ export default async function getVehicles({
       `   - Price: $${v.price || 'N/A'}\n` +
       `   - Mileage: ${v.odometer?.toLocaleString() || 'N/A'} miles\n` +
       `   - Color: ${v.colour || 'N/A'}\n` +
-      `   - VIN: ${v.vin || 'N/A'}`
+      `   - VIN: ${v.vin || 'N/A'}\n` +
+      `   - Updated: ${v.updated_at ? new Date(v.updated_at).toLocaleDateString() : 'N/A'}\n` +
+      `   - Created: ${v.created_at ? new Date(v.created_at).toLocaleDateString() : 'N/A'}`
     ).join('\n\n');
 
-    return `Found ${data.length} vehicle(s):\n\n${vehicleList}`;
+    return `Found ${data.length} vehicle(s):\n\n${vehicleList}\n\n---\n📊 Data Source: vAuto.com | 🔄 Updated every 2 hours | 🏢 SportcarsLux Database`;
     
   } catch (err) {
     return `Error: ${err instanceof Error ? err.message : 'Unknown error'}`;
