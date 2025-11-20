@@ -197,16 +197,79 @@ export default async function getVehicles({
       return `No vehicles found.`;
     }
 
-    // Formatear la respuesta como texto
-    const vehicleList = data.map((v: any, i: number) => 
-      `${i + 1}. ${v.year || ''} ${v.make || ''} ${v.model || ''} ${v.series || ''}\n` +
-      `   - Price: $${v.price || 'N/A'}\n` +
-      `   - Mileage: ${v.odometer?.toLocaleString() || 'N/A'} miles\n` +
-      `   - Color: ${v.colour || 'N/A'}\n` +
-      `   - VIN: ${v.vin || 'N/A'}\n` +
-      `   - Updated: ${v.updated_at ? new Date(v.updated_at).toLocaleDateString() : 'N/A'}\n` +
-      `   - Created: ${v.created_at ? new Date(v.created_at).toLocaleDateString() : 'N/A'}`
-    ).join('\n\n');
+    // Formatear la respuesta como texto con todos los campos disponibles
+    const vehicleList = data.map((v: any, i: number) => {
+      const fields: string[] = [];
+      
+      // Basic identification
+      fields.push(`Vehicle ${i + 1}:`);
+      if (v.year || v.make || v.model || v.series) {
+        fields.push(`   ${[v.year, v.make, v.model, v.series].filter(Boolean).join(' ')}`);
+      }
+      if (v.id !== null && v.id !== undefined) fields.push(`   ID: ${v.id}`);
+      if (v.vin) fields.push(`   VIN: ${v.vin}`);
+      if (v.stock_number) fields.push(`   Stock Number: ${v.stock_number}`);
+      if (v.model_code) fields.push(`   Model Code: ${v.model_code}`);
+      if (v.series_detail) fields.push(`   Series Detail: ${v.series_detail}`);
+      if (v.slug) fields.push(`   Slug: ${v.slug}`);
+      
+      // Pricing
+      if (v.price !== null && v.price !== undefined) fields.push(`   Price: $${v.price.toLocaleString()}`);
+      if (v.custom_price !== null && v.custom_price !== undefined) fields.push(`   Custom Price: $${v.custom_price.toLocaleString()}`);
+      if (v.msrp !== null && v.msrp !== undefined) fields.push(`   MSRP: $${v.msrp.toLocaleString()}`);
+      
+      // Physical attributes
+      if (v.colour) fields.push(`   Exterior Color: ${v.colour}`);
+      if (v.interior_color) fields.push(`   Interior Color: ${v.interior_color}`);
+      if (v.body) fields.push(`   Body Type: ${v.body}`);
+      if (v.door_count !== null && v.door_count !== undefined) fields.push(`   Door Count: ${v.door_count}`);
+      
+      // Condition & Type
+      if (v.new_used) fields.push(`   Condition: ${v.new_used}`);
+      if (v.certified) fields.push(`   Certified: ${v.certified}`);
+      if (v.age !== null && v.age !== undefined) fields.push(`   Age: ${v.age} days`);
+      
+      // Mechanical specs
+      if (v.odometer !== null && v.odometer !== undefined) fields.push(`   Mileage: ${v.odometer.toLocaleString()} miles`);
+      if (v.transmission) fields.push(`   Transmission: ${v.transmission}`);
+      if (v.drivetrain_desc) fields.push(`   Drivetrain: ${v.drivetrain_desc}`);
+      if (v.fuel) fields.push(`   Fuel Type: ${v.fuel}`);
+      if (v.engine) fields.push(`   Engine: ${v.engine}`);
+      if (v.engine_cylinder_count !== null && v.engine_cylinder_count !== undefined) fields.push(`   Cylinders: ${v.engine_cylinder_count}`);
+      if (v.engine_displacement) fields.push(`   Engine Displacement: ${v.engine_displacement}`);
+      
+      // MPG
+      if (v.city_mpg !== null && v.city_mpg !== undefined) fields.push(`   City MPG: ${v.city_mpg}`);
+      if (v.highway_mpg !== null && v.highway_mpg !== undefined) fields.push(`   Highway MPG: ${v.highway_mpg}`);
+      
+      // Descriptions
+      if (v.description) fields.push(`   Description: ${v.description.substring(0, 200)}${v.description.length > 200 ? '...' : ''}`);
+      if (v.ai_description) fields.push(`   AI Description: ${v.ai_description.substring(0, 200)}${v.ai_description.length > 200 ? '...' : ''}`);
+      
+      // Dealer info
+      if (v.dealer_name) fields.push(`   Dealer: ${v.dealer_name}`);
+      if (v.dealer_id) fields.push(`   Dealer ID: ${v.dealer_id}`);
+      
+      // Photos & Images
+      if (v.photo_count !== null && v.photo_count !== undefined) fields.push(`   Photo Count: ${v.photo_count}`);
+      if (v.photos_last_modified_date) fields.push(`   Photos Last Modified: ${v.photos_last_modified_date}`);
+      if (v.photos && Array.isArray(v.photos) && v.photos.length > 0) fields.push(`   Photos: ${v.photos.length} photo(s) available`);
+      if (v.images_hd && Array.isArray(v.images_hd) && v.images_hd.length > 0) fields.push(`   HD Images: ${v.images_hd.length} image(s) available`);
+      if (v.sticker_url) fields.push(`   Sticker URL: ${v.sticker_url}`);
+      
+      // Features
+      if (v.features && Array.isArray(v.features) && v.features.length > 0) fields.push(`   Features: ${v.features.length} feature(s) listed`);
+      
+      // Other
+      if (v.tags) fields.push(`   Tags: ${v.tags}`);
+      if (v.inventory_date) fields.push(`   Inventory Date: ${v.inventory_date}`);
+      
+      // Timestamps
+      if (v.created_at) fields.push(`   Created: ${new Date(v.created_at).toLocaleString()}`);
+      if (v.updated_at) fields.push(`   Updated: ${new Date(v.updated_at).toLocaleString()}`);
+      
+      return fields.join('\n');
+    }).join('\n\n');
 
     return `Found ${data.length} vehicle(s):\n\n${vehicleList}\n\n---\n📊 Data Source: vAuto.com | 🔄 Updated every 2 hours | 🏢 SportcarsLux Database`;
     
